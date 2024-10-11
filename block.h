@@ -17,6 +17,6 @@ typedef struct merkle_node {
     unsigned char *hash;
     struct MerkleNode *left;
     struct MerkleNode *right;
-} m_n;
+} m_n; //não implementado
 
 #endif // BLOCK_H
