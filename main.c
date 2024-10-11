@@ -195,7 +195,7 @@ int validate_chain(Block *head){
     }
 
     if (head->prev_blk->id+1 != head->id){
-        printf("\nerror: id invalid");
+        printf("\nerror: id invalid\n");
         return 0;
     }
 
@@ -216,7 +216,10 @@ int validate_chain(Block *head){
 }
 
 
-void free_chain(Block *head) {
+int free_chain(Block *head) {
+    if (head == NULL){
+        return 0;
+    }
     Block *next = head;
     Block *current = next->prev_blk;
 
@@ -378,7 +381,7 @@ int main()
                 if (corruption) {
                     printf("O penultimo bloco sofreu alteração nos dados para outro valor assim gerando um novo hash!\n");
                     printf("A seguir, tente validar a blockchain e veja o que acontece!\n");
-                    printf("Se quiser continuar com as interações, limpe a blockchain e recomece com uma blockchain válida!");
+                    printf("Se quiser continuar com as interações, limpe a blockchain e recomece com uma blockchain válida!\n");
                     pause_screen();
                 }
                 else {
@@ -392,12 +395,13 @@ int main()
             clear_screen();
             free_chain(blk_current);
             blk_current = NULL;
-            printf("Blockchain excluída com Sucesso!");
+            printf("Blockchain excluída com Sucesso!\n");
             pause_screen();
         }
         clear_screen();
 
     }
+    blk_current = NULL;
     free_chain(blk_current);
 
 
