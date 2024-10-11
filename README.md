@@ -1,5 +1,5 @@
 # 🤷‍♂️O que é este repositório?
-**Este repositório contém uma implemenação básica de uma blockchain na Linguagem C. \
+**💬Este repositório contém uma implemenação básica de uma blockchain na Linguagem C. \
 Siga as próximas instruções para conseguir ultilizar esse código.\
 (Obs:. O programa ja conta com uma GUI, então não se preocupe, será intuitivo ultilizá-lo).**
 
@@ -7,7 +7,7 @@ Siga as próximas instruções para conseguir ultilizar esse código.\
 
 ## 🚨Pré-requisitos - Windows
 Por via das dúvidas quando possível se utilize do modo administrador para fazer as instações e acessos a seguir.
-Você precisará fazer a instalação do openSSL e do GCC.
+Você precisará fazer a instalação do openSSL e do GCC. \
 **⚠️<u>[Win64 OpenSSL v3.3.2⬇️](https://slproweb.com/download/Win64OpenSSL-3_3_2.exe)</u>** -> Windows  
 **⚠️<u>[Win64 OpenSSL v3.3.2⬇️](https://slproweb.com/products.html)</u>** -> link alternativo
   * Atenção! Instale  no diretório do Windows.  E após isso coloque o diretório `C:\Program Files\OpenSSL-Win64\bin` do openSSL no PATH(_para saber como, clique [aqui](https://oobj.com.br/bc/article/como-configurar-variavel-de-ambiente-no-windows-para-emiss%C3%A3o-de-mf-e-1180.html)_).
@@ -63,8 +63,8 @@ typedef struct Block {
 //A estutura abaixo não foi implementada ainda
 typedef struct merkle_node {
     unsigned char *hash; //Hash do nó Merkle.
-    struct MerkleNode *left; //Ponteiro para o nó filho à esquerda.
-    struct MerkleNode *right; //Ponteiro para o nó filho à direita.
+    struct merkle_node *left; //Ponteiro para o nó filho à esquerda.
+    struct merkle_node *right; //Ponteiro para o nó filho à direita.
 } m_n;
 ```
 
