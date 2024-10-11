@@ -6,7 +6,8 @@ Siga as próximas instruções para conseguir ultilizar esse código.\
 # ⚙️Como compilar e rodar o código?
 
 ## 🚨Pré-requisitos - Windows
-Por via das dúvidas quando possível se utilize do modo administrador para fazer as instações e acessos a seguir. \
+Por via das dúvidas quando possível se utilize do modo administrador para fazer as instações e acessos a seguir.
+Você precisará fazer a instalação do openSSL e do GCC.
 **⚠️<u>[Win64 OpenSSL v3.3.2⬇️](https://slproweb.com/download/Win64OpenSSL-3_3_2.exe)</u>** -> Windows  
 **⚠️<u>[Win64 OpenSSL v3.3.2⬇️](https://slproweb.com/products.html)</u>** -> link alternativo
   * Atenção! Instale  no diretório do Windows.  E após isso coloque o diretório `C:\Program Files\OpenSSL-Win64\bin` do openSSL no PATH(_para saber como, clique [aqui](https://oobj.com.br/bc/article/como-configurar-variavel-de-ambiente-no-windows-para-emiss%C3%A3o-de-mf-e-1180.html)_).
