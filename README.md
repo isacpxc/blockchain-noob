@@ -1,3 +1,8 @@
+# 🤷‍♂️O que é este repositório?
+**Este repositório contém uma implemenação básica de uma blockchain na Linguagem C. \
+Siga as próximas instruções para conseguir ultilizar esse código.\
+(Obs:. O programa ja conta com uma GUI, então não se preocupe, será intuitivo ultilizá-lo).**
+
 # ⚙️Como compilar e rodar o código?
 
 ## 🚨Pré-requisitos - Windows
@@ -33,9 +38,10 @@ Por via das dúvidas quando possível se utilize do modo administrador para faze
 
 
 ## 🚨Pré-requisitos - Linux
-## 🚧Em construção...(_a necessidade do openssl e gcc se mantém_)
+### 🚧Em construção...(_a necessidade do openssl e gcc se mantém_)
 
-
+<br/>
+<br/>
 
 # 📄Breve Documentação do código
 
