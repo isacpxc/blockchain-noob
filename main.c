@@ -64,39 +64,22 @@ unsigned char* create_sha256(const unsigned char str[], unsigned char *buffer){
 
 unsigned char *hash_block(Block block){
     unsigned char *block_record = malloc(sizeof(char)*512);
-    //printf("HERE1\n");
-    sprintf((char*)block_record," %i %ld %i %s %i", block.id, block.timestamp, block.nonce, (char*)block.prev_hash,block.data); // id timestamp nonce data
-    //printf("HERE2\n");
+    sprintf((char*)block_record," %i %ld %i %s %i", block.id, block.timestamp, block.nonce, (char*)block.prev_hash,block.data);
     unsigned char *buffer = malloc(sizeof(char)*SHA256_DIGEST_LENGTH);
-    //printf("HERE3\n");
     buffer = create_sha256((const unsigned char*)block_record,buffer);
-    //printf("HERE4\n");
     return buffer;
 }
 
 int is_valid_block(Block prev_blk, Block blk){
-
-    //Block copy = blk;
-
     if (prev_blk.id+1 != blk.id){
         printf("\nerror: id invalid");
         return 0;
     }
 
     if (!compare_block_and_prev_hashes(blk,prev_blk)){
-        //printf("prev_hash: %s",(char *)blk.prev_hash);
-        //printf("hash_p: %s",(char *)prev_blk.hash);
         printf("\nerror: prev hash invalid");
         return 0;
     }
-
-    //copy.hash = hash_block(copy);
-
-    //if (!compare_block_hashes(blk,copy)){
-    //    printf("\nerror: new hash invalid");
-    //    return 0;
-    //}
-    //printf("here");
 
     return 1;
 }
@@ -119,7 +102,6 @@ void print_blk(Block *blk){
     if (blk->prev_hash == NULL){
         printf("NULL\n");
     } else {
-        //printf("prev_hash: ");
         for(int i = 0; i<SHA256_DIGEST_LENGTH;i++){
             printf("%02hhX", blk->prev_hash[i]);
         }
@@ -159,15 +141,6 @@ int add_blk(Block *current, int data, Block **p){
     blk->hash = hash_block(*blk);
     blk->timestamp = time(NULL);
     blk->prev_blk = current;
-
-        //printf("BLK %i ->\n",blk.id);
-        //printf("id: %i\n",blk.id);
-        //printf("data: %i\n",blk.data);
-        //printf("timestamp: %ld\n",blk.timestamp);
-        //printf("hash: ");
-        //for(int i = 0; i<SHA256_DIGEST_LENGTH;i++){
-        //    printf("%02hhX", blk.hash[i]);
-        //}
 
     *p = blk;
 
@@ -270,7 +243,7 @@ int main()
         printf("2 - Adicionar Novo Bloco à cadeia\n");
         printf("3 - Exibir Blockchain\n");
         printf("4 - Validar Blockchain\n");
-        printf("5 - Adultere os dados da penultima blockchain\n");
+        printf("5 - Adultere os dados do penultimo bloco\n");
         printf("6 - Limpar Blockchain\n");
         printf("7 - Visualização em Cadeia\n");
         printf("8 - Sair\n\n");
@@ -379,7 +352,7 @@ int main()
             } else {
                 int corruption = corrupt_chain(blk_current);
                 if (corruption) {
-                    printf("O penultimo bloco sofreu alteração nos dados para outro valor assim gerando um novo hash!\n");
+                    printf("O penúltimo bloco sofreu alteração nos dados para outro valor assim gerando um novo hash!\n");
                     printf("A seguir, tente validar a blockchain e veja o que acontece!\n");
                     printf("Se quiser continuar com as interações, limpe a blockchain e recomece com uma blockchain válida!\n");
                     pause_screen();
