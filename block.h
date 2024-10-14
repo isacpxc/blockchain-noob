@@ -3,20 +3,21 @@
 
 #include <time.h>
 
+typedef struct merkle_node {
+    unsigned char *hash;
+    struct MerkleNode *left;
+    struct MerkleNode *right;
+} MerkleNode;
+
 typedef struct Block {
     size_t id;
     unsigned char *hash;
     unsigned char *prev_hash;
     time_t timestamp;
-    int nonce;
+    unsigned long int nonce;
     struct Block *prev_blk;
+    MerkleNode *root;
     int data;
 } Block;
-
-typedef struct merkle_node {
-    unsigned char *hash;
-    struct MerkleNode *left;
-    struct MerkleNode *right;
-} m_n; //não implementado
 
 #endif // BLOCK_H
