@@ -39,7 +39,8 @@ Você precisará fazer a instalação do openSSL e do GCC. \
 
 
 ## 🚨Pré-requisitos - Linux
-### 🚧Em construção...(_a necessidade do openssl e gcc se mantém_)
+### 🚧Em construção... 
+(_a necessidade do openssl e gcc se mantém, inclua a bibliotecas e e os headers necessários, e compile o código como mostrado na instrução para Windows_)
 
 <br/>
 <br/>
@@ -53,19 +54,20 @@ typedef struct Block {
     unsigned char *hash; //Hash do bloco atual.
     unsigned char *prev_hash; //Hash do bloco anterior.
     time_t timestamp; //Momento em que o bloco foi criado.
-    int nonce; //Número arbitrário usado uma única vez (PoW).
+    unsigned long int nonce; //Número arbitrário usado uma única vez (PoW).
     struct Block *prev_blk; //Ponteiro para o bloco anterior.
+    MerkleNode *root;
     int data; //Dados contidos no bloco.
 } Block;
 ```
 
 ```C
-//A estutura abaixo não foi implementada ainda
-typedef struct merkle_node {
-    unsigned char *hash; //Hash do nó Merkle.
+
+typedef struct MerkleNode {
+    unsigned char *hash; //Hash do nó raíz.
     struct merkle_node *left; //Ponteiro para o nó filho à esquerda.
     struct merkle_node *right; //Ponteiro para o nó filho à direita.
-} m_n;
+} MerkleNode;
 ```
 
 ## ➡️Funções
@@ -86,6 +88,7 @@ typedef struct merkle_node {
 * `free_chain` = Libera a memória alocada pela blockchain.
 * `corrupt_chain` = Adultera os dados do penúltimo bloco da blockchain.
 * `print_visual_chain` = Imprime a blockchain de forma visual.
+* `hash_block` = Gera o hash a partir de um inteiro.
 
 ## 📁Arquivos
 * _main.c_ = código principal
