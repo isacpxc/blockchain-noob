@@ -3,7 +3,7 @@
 
 #include <time.h>
 
-typedef struct merkle_node {
+typedef struct MerkleNode {
     unsigned char *hash;
     struct MerkleNode *left;
     struct MerkleNode *right;
