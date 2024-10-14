@@ -1,3 +1,6 @@
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/isacpxc/blockchain-noob/blob/main/README.md)
+[![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](https://github.com/isacpxc/blockchain-noob/blob/main/README.pt-br.md)
+
 # 🤷‍♂️What is this repository?
 **💬This repository contains a basic implementation of a blockchain in the C Language. Follow the instructions below to use this code. (Note: The program already includes a GUI, so don't worry, it will be intuitive to use).**\
 

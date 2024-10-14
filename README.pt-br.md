@@ -1,3 +1,6 @@
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/isacpxc/blockchain-noob/blob/main/README.md)
+[![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](https://github.com/isacpxc/blockchain-noob/blob/main/README.pt-br.md)
+
 # 🤷‍♂️O que é este repositório?
 **💬Este repositório contém uma implemenação básica de uma blockchain na Linguagem C. \
 Siga as próximas instruções para conseguir ultilizar esse código.\
