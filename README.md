@@ -106,3 +106,6 @@ typedef struct MerkleNode {
 * `locale.h`: Configurações de localidade (ex.: setlocale).
 
 * `openssl/sha.h`: Funções de hash SHA (ex.: SHA256).
+
+# ⌛Futuro
+### As implementações futuros podem ser vistas nas issues do repositório.
