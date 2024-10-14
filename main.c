@@ -334,7 +334,7 @@ int main()
             } else {
                 if (verify_prev_null(blk_current)){
                     int data;
-                    printf("Digite o dado desse bloco(int): ");
+                    printf("(valor esperado a seguir: inteiro)\nDigite o dado desse bloco(abstração de transação): ");
                     scanf("%i",&data);
                     int conf = add_blk(blk_current,data,&blk_current);
                     if (conf == 1) printf("\n\nBloco adicionado com Sucesso!\n");
