@@ -64,7 +64,15 @@ unsigned char* create_sha256(const unsigned char str[], unsigned char *buffer){
 
 unsigned char *hash_block(Block block){
     unsigned char *block_record = malloc(sizeof(char)*512);
-    sprintf((char*)block_record," %i %ld %i %s %i", block.id, block.timestamp, block.nonce, (char*)block.prev_hash,block.data);
+    sprintf((char*)block_record," %i %ld %lu %s %s %i", block.id, block.timestamp, block.nonce, (char*)block.prev_hash,(char*)block.root->hash,block.data);
+    unsigned char *buffer = malloc(sizeof(char)*SHA256_DIGEST_LENGTH);
+    buffer = create_sha256((const unsigned char*)block_record,buffer);
+    return buffer;
+}
+
+unsigned char* data_hash256(int data){
+    unsigned char *block_record = malloc(sizeof(char)*512);
+    sprintf((char*)block_record,"%i", data);
     unsigned char *buffer = malloc(sizeof(char)*SHA256_DIGEST_LENGTH);
     buffer = create_sha256((const unsigned char*)block_record,buffer);
     return buffer;
@@ -93,6 +101,12 @@ void print_blk(Block *blk){
     printf("id: %i\n",blk->id);
     printf("data: %i\n",blk->data);
     printf("timestamp: %ld\n",blk->timestamp);
+    printf("merkle root: ");
+    for(int i = 0; i<SHA256_DIGEST_LENGTH;i++){
+        printf("%02hhX", blk->root->hash[i]);
+    }
+    printf("\n");
+    printf("nonce: %lu\n",blk->nonce);
     printf("hash: ");
     for(int i = 0; i<SHA256_DIGEST_LENGTH;i++){
         printf("%02hhX", blk->hash[i]);
@@ -111,7 +125,7 @@ void print_blk(Block *blk){
 }
 
 
-void print_chain(Block *head){
+int print_chain(Block *head){
     if (head == NULL){
         printf("\n\nSua Blockchain ainda não existe amigo!\n\n");
         return 0;
@@ -134,13 +148,24 @@ int add_blk(Block *current, int data, Block **p){
         return 0;
     }
 
+    MerkleNode *mk = (MerkleNode*)malloc(sizeof(MerkleNode));
+    if (!mk) {
+        printf("Erro de alocação de memória!\n");
+        return 0;
+    }
+
+    mk->left = NULL;
+    mk->right = NULL;
+    mk->hash = data_hash256(data);
+
     blk->id = current->id+1;
     blk->data = data;
-    blk->nonce = current->nonce;
+    blk->nonce = current->nonce + 1;
     blk->prev_hash = current->hash;
-    blk->hash = hash_block(*blk);
+    blk->root = mk;
     blk->timestamp = time(NULL);
     blk->prev_blk = current;
+    blk->hash = hash_block(*blk);
 
     *p = blk;
 
@@ -206,7 +231,7 @@ int free_chain(Block *head) {
 
 
 int corrupt_chain(Block *head){
-    head->prev_blk->data = 36723472456;
+    head->prev_blk->data = 367256;
     Block *prev = malloc(sizeof(Block));
     prev = head->prev_blk;
     head->prev_blk->hash = hash_block(*prev);
@@ -225,6 +250,7 @@ void print_visual_chain(Block *head){
     printf("\n\n");
 
 }
+
 
 int main()
 {
@@ -278,13 +304,20 @@ int main()
             if (blk_current != NULL ){
                 printf("O bloco Gênesis ja foi criado anteriormente!\n");
             } else {
+
+
                 Block blk_gen;
+                blk_gen.root = malloc(sizeof(MerkleNode));
+
                 blk_gen.id = 0;
                 blk_gen.timestamp = time(NULL);
                 blk_gen.nonce = 0;
                 blk_gen.prev_hash = NULL;
                 blk_gen.prev_blk = NULL;
                 blk_gen.data = 0;
+                blk_gen.root->left = NULL;
+                blk_gen.root->right = NULL;
+                blk_gen.root->hash = data_hash256(blk_gen.data);
                 blk_gen.hash = hash_block(blk_gen);
                 blk_current = &blk_gen;
 
@@ -352,10 +385,9 @@ int main()
             } else {
                 int corruption = corrupt_chain(blk_current);
                 if (corruption) {
-                    printf("O penúltimo bloco sofreu alteração nos dados para outro valor assim gerando um novo hash!\n");
+                    printf("O penúltimo bloco sofreu alteração nos dados para o valor 367256 assim gerando um novo hash!\n");
                     printf("A seguir, tente validar a blockchain e veja o que acontece!\n");
                     printf("Se quiser continuar com as interações, limpe a blockchain e recomece com uma blockchain válida!\n");
-                    pause_screen();
                 }
                 else {
                     printf("algo ocorreu errado!\n");
