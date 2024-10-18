@@ -255,6 +255,7 @@ void print_visual_chain(Block *head){
 int main()
 {
 
+//    pause_screen();
     Block *blk_current = NULL;
     int out = 0;
     int choice;
