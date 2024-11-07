@@ -24,11 +24,13 @@ To be on the safe side, when possible, use the administrator mode to perform the
 4. Now go to the directory `C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\` and copy the files `libssl.lib` and `libcrypto.lib` to the directory `C:\mingw64\lib\`.
 5. Navigate to the project folder where main.c is located and execute the following command:
       ```console
-   gcc main.c -o main -lssl -lcrypto
+   gcc main.c blockchain.c -o main -lssl -lcrypto
    ```
 * `gcc`: Invokes the GNU compiler.
 
 * `main.c`: The source file you want to compile.
+
+* `blockchain.c` = Functions File.
 
 * `-o main`: Sets the output executable file name to main.
 
@@ -68,6 +70,14 @@ typedef struct MerkleNode {
 } MerkleNode;
 ```
 
+```C
+typedef struct {
+    char sender_wallet[13]; ///Sender's address
+    char recipient_wallet[13]; //Recipient's address
+    int amount; //Amount sent
+} Transaction;
+```
+
 ## Functions
 
 * `clear_screen` = Clears the console screen, depending on the operating system.
@@ -87,10 +97,24 @@ typedef struct MerkleNode {
 * `corrupt_chain` = Alters the data of the penultimate block in the blockchain.
 * `print_visual_chain` = Visually prints the blockchain.
 * `hash_block` = Generates a hash from an integer.
+* random_uppercase_letter = Generates a random uppercase letter
+* `random_digit` = Generates a random digit.
+* `generate_wallet_address` = Generates a random wallet address
+* `validate_wallet_address` = Validates a wallet address.
+* `create_transaction` = Creates a transaction and adds addresses to the list of unique addresses.
+* `add_transaction` = Adds a transaction to the transaction array
+* `proof_of_work` = Performs the Proof of Work algorithm to mine a block
+* `print_transaction_pool` = Prints all transactions in the transaction pool.
+* `add_unique_address` = Adds an address to the list of unique addresses if it is not already present.
+* `print_addresses` = Prints all unique addresses in the address list
+* `wallet_exists` = Checks if a wallet address exists in the address list
+* `print_wallet_transactions` = Searches the blockchain and prints all transactions involving a specific wallet address.
 
 ## Files
 * _main.c_ = Main Code.
 * _block.h_ = Struct Definitions.
+* _blockchain.c_ = Functions used in _main.c_
+* _blockchain.h_ = Function definitions in _blockchain.c_ and constants
 
 ## 📚Libraries Used
 * `stdio.h`: Input and output functions (e.g., printf, scanf).
@@ -104,6 +128,8 @@ typedef struct MerkleNode {
 * `locale.h`: Locale settings (e.g., setlocale).
 
 * `openssl/sha.h`: SHA hash functions (e.g., SHA256).
+
+* `ctype.h`: Functions for testing and mapping characters.
 
 # Future
 ### Future implementations can be viewed in the issues section of the repository.

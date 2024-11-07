@@ -27,11 +27,13 @@ Você precisará fazer a instalação do openSSL e do GCC. \
 4. Agora vá no diretório `C:\Program Files\OpenSSL-Win64\lib\VC\x64\MD\` e copie os arquivos `libssl.lib` e `libcrypto.lib` para o diretório `C:\mingw64\lib\`.
 5. Prossiga para a pasta do projeto onde se encontra o `main.c` e execute o seguinte comando:
       ```console
-   gcc main.c -o main -lssl -lcrypto
+   gcc main.c blockchain.c -o main -lssl -lcrypto
    ```
 * `gcc`: Invoca o compilador GNU.
 
 * `main.c`: O arquivo fonte que você quer compilar.
+  
+* `blockchain.c` = Arquivo de Funções
 
 * `-o main`: Define o nome do arquivo executável de saída como main.
 
@@ -73,6 +75,15 @@ typedef struct MerkleNode {
 } MerkleNode;
 ```
 
+```C
+
+typedef struct {
+    char sender_wallet[13]; //Endereço do remetente
+    char recipient_wallet[13]; //Endereço do Destinatário
+    int amount; //Quantidade enviada
+} Transaction;
+```
+
 ## ➡️Funções
 
 * `clear_screen` = Limpa a tela do console, dependendo do sistema operacional.
@@ -92,10 +103,24 @@ typedef struct MerkleNode {
 * `corrupt_chain` = Adultera os dados do penúltimo bloco da blockchain.
 * `print_visual_chain` = Imprime a blockchain de forma visual.
 * `hash_block` = Gera o hash a partir de um inteiro.
+* `random_uppercase_letter` = Gera uma letra maiúscula aleatória
+* `random_digit` = Gera um dígito aleatório.
+* `generate_wallet_address` = Gera um endereço de carteira aleatório
+* `validate_wallet_address` = Valida um endereço de carteira
+* `create_transaction` = Cria uma transação e adiciona endereços à lista de endereços únicos.
+* `add_transaction` = Adiciona uma transação ao array de transações
+* `proof_of_work` = Executa o algoritmo de Proof of Work para minerar um bloco.
+* `print_transaction_pool` = Imprime todas as transações na pool de transações.
+* `add_unique_address` = Adiciona um endereço à lista de endereços únicos, se ainda não estiver presente.
+* `print_addresses` = Imprime todos os endereços únicos na lista de endereços.
+* `wallet_exists` = Verifica se um endereço de carteira existe na lista de endereços.
+* `print_wallet_transactions` = Procura na blockchain e imprime todas as transações envolvendo um endereço de carteira específico.
 
 ## 📁Arquivos
 * _main.c_ = código principal
 * _block.h_ = definições de structs
+* _blockchain.c_ = Funções ultilizadas no _main.c_
+* _blockchain.h_ = Definições de funções em _blockchain.c_ e e constantes
 
 ## 📚Bibliotecas usadas
 * `stdio.h`: Funções de entrada e saída (ex.: printf, scanf).
@@ -109,6 +134,8 @@ typedef struct MerkleNode {
 * `locale.h`: Configurações de localidade (ex.: setlocale).
 
 * `openssl/sha.h`: Funções de hash SHA (ex.: SHA256).
+
+* `ctype.h`: Funções para testar e mapear caracteres
 
 # ⌛Futuro
 ### As implementações futuros podem ser vistas nas issues do repositório.
