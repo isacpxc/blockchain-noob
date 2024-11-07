@@ -46,7 +46,7 @@ void print_instructions() {
     printf("*Formato esperado de endereço válido: 3 letras maiúsculas seguidos de 8 inteiros decimais seguido de uma letra maiúscula\n");
     printf("**EXEMPLO: ABC12345678Z\n");
     printf("*Tipo de 'amount' na transação: int\n");
-
+    printf("*A dificuldade de mineração do bloco pode ser ajustada em blockchain.h(!!!cuidado com a ousadia!!!)");
 }
 
 unsigned char *hash_block(Block block){
