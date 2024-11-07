@@ -309,14 +309,13 @@ void proof_of_work(Block *blk) {
     memset(target, '0', DIFFICULTY);
     target[DIFFICULTY] = '\0';
 
-    int counter = 0; // Contador para mostrar o progresso
+    int counter = 0;
 
     do {
         blk->nonce++;
         hash = hash_block(*blk);
         counter++;
 
-        // Imprime um ponto a cada 10000 iterações para mostrar o progresso
         if (counter % 10000 == 0) {
             printf(".");
             fflush(stdout);
@@ -387,7 +386,7 @@ int print_addresses(Address **list_address) {
 
 int wallet_exists(Address **list_address, char wallet[13]) {
     if (list_address == NULL || *list_address == NULL) {
-        return 0; // Lista vazia, endereço não encontrado
+        return 0;
     }
 
     Address *current = *list_address;
