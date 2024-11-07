@@ -1,35 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <string.h>
 #include <locale.h>
-#include <openssl/sha.h>
-#include "block.h"
+#include "blockchain.h"
+#include <string.h>
 
-
-
-void print_instructions() {
-    printf("===== Instruções de Utilização do Programa Blockchain =====\n\n");
-    printf("0 - Instruções\n");
-    printf("    Exibe estas instruções.\n\n");
-    printf("1 - Criar Bloco Gênesis\n");
-    printf("    Cria o bloco inicial da blockchain. Este deve ser o primeiro passo.\n\n");
-    printf("2 - Adicionar Novo Bloco à cadeia\n");
-    printf("    Adiciona um novo bloco à blockchain. Somente pode ser feito após a criação do bloco gênesis.\n\n");
-    printf("3 - Exibir Blockchain\n");
-    printf("    Exibe todos os blocos presentes na blockchain.\n\n");
-    printf("4 - Validar Blockchain\n");
-    printf("    Verifica a integridade da blockchain, garantindo que todos os blocos são válidos.\n\n");
-    printf("5 - Adultere os dados da penultima blockchain\n");
-    printf("    Altera os dados do penúltimo bloco na blockchain, gerando um novo hash para ele.\n\n");
-    printf("6 - Limpar Blockchain\n");
-    printf("    Remove todos os blocos da blockchain, limpando-a completamente.\n\n");
-    printf("7 - Visualização em Cadeia\n");
-    printf("    Mostra uma visualização dos blocos da blockchain em formato de cadeia.\n\n");
-    printf("8 - Sair\n");
-    printf("    Encerra o programa.\n\n");
-    printf("==============================================\n");
-}
 
 void clear_screen() {
 #ifdef _WIN32
@@ -48,208 +22,11 @@ void pause_screen() {
 #endif
 }
 
-
-int compare_block_hashes(Block block1, Block block2) {
-    return memcmp(block1.hash, block2.hash, SHA256_DIGEST_LENGTH) == 0;
+void flush_in(){
+    int ch;
+    while( (ch = fgetc(stdin)) != EOF && ch != '\n' ){}
 }
 
-int compare_block_and_prev_hashes(Block block1, Block block2) {
-    return memcmp(block1.prev_hash, block2.hash, SHA256_DIGEST_LENGTH) == 0;
-}
-
-unsigned char* create_sha256(const unsigned char str[], unsigned char *buffer){
-    SHA256(str, strlen((const char*)str), buffer);
-    return buffer;
-}
-
-unsigned char *hash_block(Block block){
-    unsigned char *block_record = malloc(sizeof(char)*512);
-    sprintf((char*)block_record," %i %ld %lu %s %s %i", block.id, block.timestamp, block.nonce, (char*)block.prev_hash,(char*)block.root->hash,block.data);
-    unsigned char *buffer = malloc(sizeof(char)*SHA256_DIGEST_LENGTH);
-    buffer = create_sha256((const unsigned char*)block_record,buffer);
-    return buffer;
-}
-
-unsigned char* data_hash256(int data){
-    unsigned char *block_record = malloc(sizeof(char)*512);
-    sprintf((char*)block_record,"%i", data);
-    unsigned char *buffer = malloc(sizeof(char)*SHA256_DIGEST_LENGTH);
-    buffer = create_sha256((const unsigned char*)block_record,buffer);
-    return buffer;
-}
-
-int is_valid_block(Block prev_blk, Block blk){
-    if (prev_blk.id+1 != blk.id){
-        printf("\nerror: id invalid");
-        return 0;
-    }
-
-    if (!compare_block_and_prev_hashes(blk,prev_blk)){
-        printf("\nerror: prev hash invalid");
-        return 0;
-    }
-
-    return 1;
-}
-
-void print_blk(Block *blk){
-    if (blk == NULL) {
-        printf("NULL!!!!!!!\n");
-        return;
-    }
-    printf("BLK %i ->\n",blk->id);
-    printf("id: %i\n",blk->id);
-    printf("data: %i\n",blk->data);
-    printf("timestamp: %ld\n",blk->timestamp);
-    printf("merkle root: ");
-    for(int i = 0; i<SHA256_DIGEST_LENGTH;i++){
-        printf("%02hhX", blk->root->hash[i]);
-    }
-    printf("\n");
-    printf("nonce: %lu\n",blk->nonce);
-    printf("hash: ");
-    for(int i = 0; i<SHA256_DIGEST_LENGTH;i++){
-        printf("%02hhX", blk->hash[i]);
-    }
-    printf("\n");
-    printf("prev_hash: ");
-    if (blk->prev_hash == NULL){
-        printf("NULL\n");
-    } else {
-        for(int i = 0; i<SHA256_DIGEST_LENGTH;i++){
-            printf("%02hhX", blk->prev_hash[i]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
-
-int print_chain(Block *head){
-    if (head == NULL){
-        printf("\n\nSua Blockchain ainda não existe amigo!\n\n");
-        return 0;
-    }
-
-    Block *p = head;
-
-    while (p != NULL){
-        print_blk(p);
-        p = p->prev_blk;
-    }
-}
-
-
-int add_blk(Block *current, int data, Block **p){
-
-    Block *blk = malloc(sizeof(Block));
-    if (!blk) {
-        printf("Erro de alocação de memória!\n");
-        return 0;
-    }
-
-    MerkleNode *mk = (MerkleNode*)malloc(sizeof(MerkleNode));
-    if (!mk) {
-        printf("Erro de alocação de memória!\n");
-        return 0;
-    }
-
-    mk->left = NULL;
-    mk->right = NULL;
-    mk->hash = data_hash256(data);
-
-    blk->id = current->id+1;
-    blk->data = data;
-    blk->nonce = current->nonce + 1;
-    blk->prev_hash = current->hash;
-    blk->root = mk;
-    blk->timestamp = time(NULL);
-    blk->prev_blk = current;
-    blk->hash = hash_block(*blk);
-
-    *p = blk;
-
-    return 1;
-
-}
-
-int verify_null(Block *head){
-    if (head == NULL) return 1;
-    return 0;
-}
-
-int verify_prev_null(Block *head){
-    if (head->prev_blk == NULL) return 1;
-    return 0;
-}
-
-
-int validate_chain(Block *head){
-    if(head == NULL){
-        return 0;
-    }
-    if(head->prev_blk == NULL){
-        return 0;
-    }
-
-    if (head->prev_blk->id+1 != head->id){
-        printf("\nerror: id invalid\n");
-        return 0;
-    }
-
-    Block *p = head;
-    Block *prev = p->prev_blk;
-
-    while (prev != NULL){
-        if (is_valid_block(*prev,*p)){
-            printf(".\n");
-        } else {
-            return 0;
-        }
-        p = p->prev_blk;
-        prev = prev->prev_blk;
-    }
-    printf("Blockchain validada!\n");
-    return 1;
-}
-
-
-int free_chain(Block *head) {
-    if (head == NULL){
-        return 0;
-    }
-    Block *next = head;
-    Block *current = next->prev_blk;
-
-    while (current != NULL) {
-        free(next);
-        next = current;
-        current = current->prev_blk;
-    }
-    free(current);
-}
-
-
-int corrupt_chain(Block *head){
-    head->prev_blk->data = 367256;
-    Block *prev = malloc(sizeof(Block));
-    prev = head->prev_blk;
-    head->prev_blk->hash = hash_block(*prev);
-    return 1;
-}
-
-void print_visual_chain(Block *head){
-    Block *p = (Block*)malloc(sizeof(Block));
-    p = head;
-
-    while(p!=NULL){
-        printf("||BLK %i||",p->id);
-        if (p->prev_blk != NULL) printf("==>");
-        p = p->prev_blk;
-    }
-    printf("\n\n");
-
-}
 
 
 int main()
@@ -259,25 +36,33 @@ int main()
     Block *blk_current = NULL;
     int out = 0;
     int choice;
+    Transaction pool_wait[MAX_TRANSACTIONS];
+    int count_t=0;
+    Address **list_address = (Address**)malloc(sizeof(Address*));
+    *list_address = NULL;
+
     setlocale(LC_ALL, "Portuguese");
 
 
 
     while(!out){
-        printf("=======GUI Blockchain Example Structure=======\n\n");
-        printf("0 - Instruções\n");
+        printf("=======GUI Blockchain Noob=======\n\n");
+        printf("0 - Instruções e Observações\n");
         printf("1 - Criar Bloco Gênesis\n");
-        printf("2 - Adicionar Novo Bloco à cadeia\n");
+        printf("2 - Minere um Novo Bloco e o adicione na blockchain\n");
         printf("3 - Exibir Blockchain\n");
         printf("4 - Validar Blockchain\n");
         printf("5 - Adultere os dados do penultimo bloco\n");
         printf("6 - Limpar Blockchain\n");
         printf("7 - Visualização em Cadeia\n");
-        printf("8 - Sair\n\n");
+        printf("8 - Fazer transação\n");
+        printf("9 - Imprimir pool de transações pendentes\n");
+        printf("10 - histórico de transações\n");
+        printf("11 - Sair\n\n");
         printf("==============================================\n");
         printf("Escolha uma das opções acima: ");
         scanf("%i",&choice);
-        if (choice == 8){
+        if (choice == 11){
             printf("Programa finalizado!\n");
             out = 1;
             pause_screen();
@@ -307,53 +92,122 @@ int main()
             } else {
 
 
-                Block blk_gen;
-                blk_gen.root = malloc(sizeof(MerkleNode));
-
-                blk_gen.id = 0;
-                blk_gen.timestamp = time(NULL);
-                blk_gen.nonce = 0;
-                blk_gen.prev_hash = NULL;
-                blk_gen.prev_blk = NULL;
-                blk_gen.data = 0;
-                blk_gen.root->left = NULL;
-                blk_gen.root->right = NULL;
-                blk_gen.root->hash = data_hash256(blk_gen.data);
-                blk_gen.hash = hash_block(blk_gen);
-                blk_current = &blk_gen;
-
+                //Block blk_gen;
+                blk_current = (Block *)malloc(sizeof(Block));
+                blk_current->root = (MerkleNode *)malloc(sizeof(MerkleNode));
+                blk_current->id = 0; blk_current->timestamp = time(NULL);
+                blk_current->nonce = 0;
+                blk_current->prev_hash = NULL;
+                blk_current->prev_blk = NULL;
+                blk_current->data = 0;
+                blk_current->root->left = NULL; blk_current->root->right = NULL;
+                blk_current->root->hash = data_hash256(blk_current->data);
+                blk_current->hash = hash_block(*blk_current);
+                blk_current->trans.amount = 0;
+                strncpy(blk_current->trans.sender_wallet, "ABC123456789", 12);
+                blk_current->trans.sender_wallet[12] = '\0';
+                strncpy(blk_current->trans.recipient_wallet, "ABC123456789", 12);
+                blk_current->trans.recipient_wallet[12] = '\0';
                 printf("\nBloco Gênesis Criado com Sucesso!\n");
             }
 
             pause_screen();
         }
 
-        else if (choice == 2){
+        else if (choice == 2) {
             clear_screen();
+            if (verify_null(blk_current)) {
+                printf("Antes de adicionar algum Bloco, Crie o Bloco Gênesis!\n");
+            } else if (count_t == 0) {
+                printf("A pool de transações está vazia. Adicione uma transação primeiro!\n");
+            } else {
+                if (verify_prev_null(blk_current)){
+                    Transaction trans = pool_wait[0];
+                    for (int i = 0; i < count_t - 1; i++) {
+                        pool_wait[i] = pool_wait[i + 1];
+                    }
+                    count_t--;
+                    //int data = trans.amount;
+                    int conf = add_blk(blk_current, trans, &blk_current);
+                    if (conf == 1) printf("\n\nBloco adicionado com Sucesso!\n");
+                }
+                else if (validate_chain(blk_current)) {
+                    Transaction trans = pool_wait[0]; // Pega a primeira transação da pool
+                    for (int i = 0; i < count_t - 1; i++) {
+                        pool_wait[i] = pool_wait[i + 1];
+                    }
+                    count_t--;
+                    //int data = trans.amount;
+                    int conf = add_blk(blk_current, trans, &blk_current);
+                    if (conf == 1) printf("\n\nBloco adicionado com Sucesso!\n");
+                } else {
+                    printf("\n\nO bloco não pode ser adicionado pois a blockchain não passou na validação!\n\n");
+                }
+            }
+            pause_screen();
+        }
+
+
+        else if (choice == 8){
             if (verify_null(blk_current)){
                 printf("Antes de adicionar algum Bloco, Crie o Bloco Gênesis!\n");
             } else {
-                if (verify_prev_null(blk_current)){
-                    int data;
-                    printf("(valor esperado a seguir: inteiro)\nDigite o dado desse bloco(abstração de transação): ");
-                    scanf("%i",&data);
-                    int conf = add_blk(blk_current,data,&blk_current);
-                    if (conf == 1) printf("\n\nBloco adicionado com Sucesso!\n");
+                int check_wallet = 0;
+                char receive[13], sender[13];
+                int amount;
+                Transaction new_t;
+                printf("Carteira de envio: \n");
+                scanf("%s",sender);
+                check_wallet = validate_wallet_address(sender);
+                printf("Carteira de recebimento: \n");
+                scanf("%s",receive);
+                check_wallet += validate_wallet_address(sender);
+                //printf("%s e %s", receive, sender);
+                printf("amount: \n");
+                scanf("%d",&amount);
+                if (check_wallet == 2){
+                    new_t = create_transaction(sender, receive, amount, list_address);
+                    count_t+=add_transaction(pool_wait,count_t,new_t);
                 } else {
-                    if (validate_chain(blk_current)){
-                        int data;
-                        printf("Digite o dado desse bloco(int): ");
-                        scanf("%i",&data);
-                        int conf = add_blk(blk_current,data,&blk_current);
-                        if (conf == 1) printf("\n\nBloco adicionado com Sucesso!\n");
-                    } else {
-                        printf("\n\nO bloco não pode ser adicionado pois a blockchain não passou na validação!\n\n");
-                    }
-
+                    printf("Algum dos endereços é inválido! Repita a operação com endereços válidos!");
                 }
 
+                flush_in();
+                print_transaction_pool(pool_wait,count_t);
             }
             pause_screen();
+        }
+
+        else if (choice == 9){
+            if (count_t > 0){
+                print_transaction_pool(pool_wait, count_t);
+            } else {
+                printf("A pool de transações está vazia. Adicione uma transação primeiro!\n");
+            }
+            pause_screen();
+        }
+
+        else if (choice == 10){
+            char wallet[13];
+            if (print_addresses(list_address) == 0) {
+                printf("EMPTY\n");
+            } else {
+                clear_screen();
+                print_addresses(list_address);
+                printf("Digite qual carteira deseja visualizar o histórico: \n");
+                scanf("%s",wallet);
+                if (validate_wallet_address(wallet)){
+                    if (wallet_exists(list_address,wallet)) {
+                        print_wallet_transactions(blk_current,wallet);
+                    } else {
+                        printf("\nEssa carteira não participa de nenhuma transação ainda!\n");
+                    }
+                } else {
+                    printf("\n\nEsse endereço não é válido\n");
+                }
+            }
+            pause_screen();
+
         }
 
         else if (choice == 3){
@@ -380,7 +234,7 @@ int main()
             pause_screen();
         }
         else if (choice == 5){
-            int count=3;
+            //int count=3;
             if (blk_current == NULL || blk_current->prev_blk == NULL || blk_current->prev_blk->prev_blk == NULL || blk_current->prev_blk->prev_blk->prev_blk == NULL){
                 printf("Insira pelo menos 3 blocos na blockchain para isso!\n");
             } else {
