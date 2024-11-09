@@ -314,7 +314,7 @@ void proof_of_work(Block *blk) {
 
     unsigned long int counter = 0;
     hash = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
-    printf("loading");
+    printf("mining block");
     do {
         blk->nonce++;
         unsigned char *new_hash = hash_block(*blk);
