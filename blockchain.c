@@ -166,7 +166,7 @@ int add_blk(Block *current, Transaction trans, Block **p){
 
     blk->id = current->id+1;
     blk->data = trans.amount;
-    blk->nonce = current->nonce + 1;
+    blk->nonce = 0;
     blk->prev_hash = current->hash;
     blk->root = mk;
     blk->timestamp = time(NULL);
@@ -312,23 +312,28 @@ void proof_of_work(Block *blk) {
     memset(target, '0', DIFFICULTY);
     target[DIFFICULTY] = '\0';
 
-    int counter = 0;
-
+    unsigned long int counter = 0;
+    hash = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
+    printf("loading");
     do {
         blk->nonce++;
-        hash = hash_block(*blk);
+        unsigned char *new_hash = hash_block(*blk);
+        memcpy(hash, new_hash, SHA256_DIGEST_LENGTH);
+        free(new_hash);
         counter++;
 
         if (counter % 10000 == 0) {
             printf(".");
+            //printf("%lu\n", counter);
             fflush(stdout);
         }
-    } while (strncmp((const char*)hash, target, DIFFICULTY) != 0);
+    } while (strncmp((const char *)hash, target, DIFFICULTY) != 0);
 
     free(blk->hash);
     blk->hash = hash;
 
-    printf("\nHash encontrado após %d tentativas.\n", counter);
+printf("\nHash encontrado após %lu tentativas.\n", counter);
+
 }
 
 void print_transaction_pool(Transaction pool[], int count) {
