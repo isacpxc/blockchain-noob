@@ -56,6 +56,7 @@ unsigned char *hash_block(Block block){
     sprintf((char*)block_record," %lli %lld %lu %s %s %i", block.id, block.timestamp, block.nonce, (char*)block.prev_hash,(char*)block.root->hash,block.data);
     unsigned char *buffer = malloc(sizeof(char)*SHA256_DIGEST_LENGTH);
     buffer = create_sha256((const unsigned char*)block_record,buffer);
+    free(block_record);
     return buffer;
 }
 
