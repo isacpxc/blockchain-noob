@@ -104,9 +104,9 @@ int main()
                 blk_current->root->hash = data_hash256(blk_current->data);
                 blk_current->hash = hash_block(*blk_current);
                 blk_current->trans.amount = 0;
-                strncpy(blk_current->trans.sender_wallet, "ABC123456789", 12);
+                strncpy(blk_current->trans.sender_wallet, "AAA00000000A", 12);
                 blk_current->trans.sender_wallet[12] = '\0';
-                strncpy(blk_current->trans.recipient_wallet, "ABC123456789", 12);
+                strncpy(blk_current->trans.recipient_wallet, "AAA00000000A", 12);
                 blk_current->trans.recipient_wallet[12] = '\0';
                 printf("\nBloco Gênesis Criado com Sucesso!\n");
             }
