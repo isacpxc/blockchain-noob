@@ -75,10 +75,52 @@ typedef struct {
     char sender_wallet[13]; ///Sender's address
     char recipient_wallet[13]; //Recipient's address
     int amount; //Amount sent
+    int tax; //Transaction fee
 } Transaction;
 ```
 
-## Functions
+```C
+
+typedef struct Address{
+    char address[13]; //Address
+    int balance; //Balance
+    struct Address *next; //Pointer to the next address
+} Address;
+```
+
+```C
+
+typedef struct Message {
+    char type; // 'B' for Block, 'T' for Transaction
+    union { 
+        Block block;
+        Transaction transaction;
+    } data; //Stores either a Transaction or Block
+    struct Message *last_message; //Pointer to the next message
+} Message;
+
+```
+
+```C
+
+typedef struct Node {
+    int id;  // Identifier of the node
+    Block *blockchain; //Blockchain of the node
+    Transaction transaction_pool[100]; // Pool of transactions
+    Message *message_queue; //Queue of received messages
+    int transaction_count; // Count of transactions
+    struct Node *next; //Pointer to the next node
+    struct Node *prev; //Pointer to the previous node (not used)
+} Node;
+
+```
+
+## ➡️Functions and Important Variables
+
+* `current_node` = Stores the current node connected to the network.
+* `latest_added_node` = Stores the last node added to the network.
+* `network_length`
+<br/><br/>
 
 * `clear_screen` = Clears the console screen, depending on the operating system.
 * `pause_screen` = Pauses the screen until the user presses a key.
@@ -109,6 +151,32 @@ typedef struct {
 * `print_addresses` = Prints all unique addresses in the address list
 * `wallet_exists` = Checks if a wallet address exists in the address list
 * `print_wallet_transactions` = Searches the blockchain and prints all transactions involving a specific wallet address.
+* * `print_instructions` = Prints usage instructions or help for the user.
+* `data_hash256` = Generates a SHA256 hash from an integer.
+* `create_main_node` = Creates the main node of the blockchain network (which generates the genesis block).
+* `create_genesis_block` = Creates the genesis block (previously created in main.c).
+* `update_latest_added_node` = Updates the most recently added node in the network.
+* `update_current_node` = Updates the current node in the network.
+* `get_network_length` = Returns the current length of the blockchain network.
+* `get_id_current_node` = Returns the ID of the current node in the network.
+* `change_node_to` = Switches to a specific node in the network, identified by its ID.
+* `pool_length` = Returns the length of the transaction pool.
+* `pull_first_transaction` = Pulls the first transaction from the transaction pool and returns it.
+* `verify_minimum_three` = Checks if the blockchain has at least three blocks.
+* `broadcast_transaction` = Broadcasts a transaction to the network via message.
+* `broadcast_block` = Broadcasts a block to the network via message.
+* `print_message_queue` = Prints the message queue.
+* ` process_message_queue` = Processes the message queue by adding the block or transaction to the current node.
+* `check_balance` = Checks the balance of a specific wallet address.
+* `select_wallet` = Selects a wallet address from the address list.
+* `create_node` = Creates a new node in the network.
+* `print_network` = Prints the structure of the network.
+* `find_message_with_block_id` = Finds a message in the queue that contains a specific block ID.
+* `find_next_block_message` = Finds the next block message in sequence from the current block.
+* `handle_fork_resolution` = Resolves a fork in the blockchain.
+* `create_sha256_transaction` = Generates a SHA256 hash for a transaction from its data. transaction_hash = Generates the hash of a transaction.
+* `transaction_exists_in_messages` = Checks if a transaction exists in the messages.
+* `transaction_hash` = Generates the hash of a transaction based on its attributes.
 
 ## Files
 * _main.c_ = Main Code.

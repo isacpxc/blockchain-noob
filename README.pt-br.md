@@ -81,10 +81,51 @@ typedef struct {
     char sender_wallet[13]; //Endereço do remetente
     char recipient_wallet[13]; //Endereço do Destinatário
     int amount; //Quantidade enviada
+    int tax; //Taxa de transação
 } Transaction;
+
 ```
 
-## ➡️Funções
+```C
+
+typedef struct Address{
+    char address[13]; //Endereço
+    int balance; //Saldo
+    struct Address *next; //Ponteiro para o próximo endereço
+} Address;
+
+```
+```C
+
+typedef struct Message {
+    char type; // 'B' para Bloco, 'T' para Transação
+    union { 
+        Block block;
+        Transaction transaction;
+    } data; //Armazena ou Transação ou Bloco
+    struct Message *last_message; //Ponteiro para próxima mensagem
+} Message;
+```
+```C
+
+typedef struct Node {
+    int id;  // identificador do nó
+    Block *blockchain; //Blockchain do nó
+    Transaction transaction_pool[100]; // Pool de transações
+    Message *message_queue; //Fila de mensagens recebidas
+    int transaction_count; // Contagem de transações
+    struct Node *next; //Ponteiro para próximo nó
+    struct Node *prev; //Ponteiro para nó anterior(não usado)
+} Node;
+```
+
+
+## ➡️Funções e Variáveis Importantes
+
+* `current_node` = Guarda nó atual conectado à rede.
+* `latest_added_node` = Guarda último nó adicionado na rede.
+* `network_length` = guarda tamano da rede.
+<br/><br/>
 
 * `clear_screen` = Limpa a tela do console, dependendo do sistema operacional.
 * `pause_screen` = Pausa a tela até que o usuário pressione uma tecla.
@@ -115,6 +156,34 @@ typedef struct {
 * `print_addresses` = Imprime todos os endereços únicos na lista de endereços.
 * `wallet_exists` = Verifica se um endereço de carteira existe na lista de endereços.
 * `print_wallet_transactions` = Procura na blockchain e imprime todas as transações envolvendo um endereço de carteira específico.
+* `print_instructions` = Imprime as instruções de uso ou ajuda para o usuário.
+* `data_hash256` = Gera um hash SHA256 a partir de um dado inteiro.
+* `create_main_node` = Cria o nó principal da rede blockchain(o que gera o bloco gênesis).
+* `create_genesis_block` = Cria o bloco gênesis(na versão anterior era criado no próprio main.c).
+* `update_latest_added_node` = Atualiza o nó que foi adicionado mais recentemente na rede.
+* `update_current_node` = Atualiza o nó atual na rede.
+* `get_network_length` = Retorna o comprimento atual da rede blockchain.
+* `get_id_current_node` = Retorna o ID do nó atual na rede.
+* `change_node_to` = Muda para um nó específico na rede, identificando-o por seu ID.
+* `pool_length` = Retorna o comprimento da pool de transações.
+* `pull_first_transaction` = Retira a primeira transação da pool de transações e a retorna.
+* `verify_minimum_three` = Verifica se a blockchain possui pelo menos três blocos.
+* `broadcast_transaction` = Transmite uma transação para a rede via mensagem.
+* `broadcast_block` = Transmite um bloco para a rede via mensagem.
+* `print_message_queue` = Imprime a fila de mensagens.
+* `process_message_queue` = Processa a fila de mensagens adicionando o bloco ou transação no nó atual.
+* `check_balance` = Verifica o saldo de um endereço de carteira específico.
+* `select_wallet` = Seleciona um endereço de carteira na lista de endereços.
+* `create_node` = Cria um novo nó na rede.
+* `print_network` = Imprime a estrutura da rede.
+* `find_message_with_block_id` = Encontra uma mensagem na fila que contém um ID de bloco específico.
+* `find_next_block_message` = Encontra a próxima mensagem de bloco na sequência a partir do bloco atual.
+* `handle_fork_resolution` = Resolve um fork na blockchain.
+* `create_sha256_transaction` = Gera um hash SHA256 para uma transação a partir de seus dados.
+transaction_hash = Gera o hash de uma transação.
+* `transaction_exists_in_messages` = Verifica se uma transação existe nas mensagens.
+* `transaction_hash` = Gera o hash de uma transação baseada em seus atributos.
+
 
 ## 📁Arquivos
 * _main.c_ = código principal
