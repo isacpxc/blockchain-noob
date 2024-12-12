@@ -4,15 +4,6 @@
 #include "blockchain.h"
 #include <string.h>
 
-
-void clear_screen() {
-#ifdef _WIN32
-    system("cls");
-#elif defined(__linux__) || defined(__APPLE__)
-    system("clear");
-#endif
-}
-
 void pause_screen() {
 #ifdef _WIN32
     system("pause");
@@ -40,12 +31,16 @@ int main()
     int count_t=0;
     Address **list_address = (Address**)malloc(sizeof(Address*));
     *list_address = NULL;
-
+    Node *main_node = create_main_node();
+    update_current_node(main_node);
+    update_latest_added_node(main_node);
     setlocale(LC_ALL, "Portuguese");
 
 
 
     while(!out){
+        printf("Nó conectado: %d\n", get_id_current_node());
+        printf("Tamanho da rede: %d\n\n", get_network_length());
         printf("=======GUI Blockchain Noob=======\n\n");
         printf("0 - Instruções e Observações\n");
         printf("1 - Criar Bloco Gênesis\n");
@@ -53,12 +48,18 @@ int main()
         printf("3 - Exibir Blockchain\n");
         printf("4 - Validar Blockchain\n");
         printf("5 - Adultere os dados do penultimo bloco\n");
-        printf("6 - Limpar Blockchain\n");
+//        printf("6 - Limpar Blockchain\n");
         printf("7 - Visualização em Cadeia\n");
         printf("8 - Fazer transação\n");
         printf("9 - Imprimir pool de transações pendentes\n");
         printf("10 - histórico de transações\n");
         printf("11 - Sair\n\n");
+        printf("====NOVAS FUNCIONALIDADES====\n");
+        printf("12 - Criar e adicionar nó na rede\n");
+        printf("13 - Trocar nó conectado\n");
+        printf("14 - Imprimir mensagens pendentes\n");
+        printf("15 - Processar mensagens\n");
+        printf("16 - Exibir saldo de endereço\n");
         printf("==============================================\n");
         printf("Escolha uma das opções acima: ");
         scanf("%i",&choice);
@@ -76,8 +77,8 @@ int main()
 
         else if(choice == 7){
             clear_screen();
-            if(verify_null(blk_current) == 0){
-               print_visual_chain(blk_current);
+            if(verify_null() == 0){
+               print_visual_chain();
             } else {
                 printf("Insira pelo menos o bloco Gênesis para isso!\n");
             }
@@ -90,24 +91,7 @@ int main()
             if (blk_current != NULL ){
                 printf("O bloco Gênesis ja foi criado anteriormente!\n");
             } else {
-
-
-                //Block blk_gen;
-                blk_current = (Block *)malloc(sizeof(Block));
-                blk_current->root = (MerkleNode *)malloc(sizeof(MerkleNode));
-                blk_current->id = 0; blk_current->timestamp = time(NULL);
-                blk_current->nonce = 0;
-                blk_current->prev_hash = NULL;
-                blk_current->prev_blk = NULL;
-                blk_current->data = 0;
-                blk_current->root->left = NULL; blk_current->root->right = NULL;
-                blk_current->root->hash = data_hash256(blk_current->data);
-                blk_current->hash = hash_block(*blk_current);
-                blk_current->trans.amount = 0;
-                strncpy(blk_current->trans.sender_wallet, "AAA00000000A", 12);
-                blk_current->trans.sender_wallet[12] = '\0';
-                strncpy(blk_current->trans.recipient_wallet, "AAA00000000A", 12);
-                blk_current->trans.recipient_wallet[12] = '\0';
+                blk_current = create_genesis_block();
                 printf("\nBloco Gênesis Criado com Sucesso!\n");
             }
 
@@ -116,32 +100,38 @@ int main()
 
         else if (choice == 2) {
             clear_screen();
-            if (verify_null(blk_current)) {
+            if (verify_null()) {
                 printf("Antes de adicionar algum Bloco, Crie o Bloco Gênesis!\n");
-            } else if (count_t == 0) {
+            } else if (pool_length() == 0) {
                 printf("A pool de transações está vazia. Adicione uma transação primeiro!\n");
             } else {
-                if (verify_prev_null(blk_current)){
-                    Transaction trans = pool_wait[0];
-                    for (int i = 0; i < count_t - 1; i++) {
-                        pool_wait[i] = pool_wait[i + 1];
+                char wallet_address[13];
+                Address* wallet;
+                print_addresses(list_address);
+                printf("Digite qual carteira deseja usar para receber a taxa de mineração: \n");
+                scanf("%s",wallet_address);
+                if (validate_wallet_address(wallet_address)){
+                    if (wallet_exists(list_address,wallet_address)) {
+                        ////////
+                        wallet = select_wallet(list_address,wallet_address);
+                        if (verify_prev_null()){
+                            Transaction trans = pull_first_transaction();
+                            int conf = add_blk(trans, list_address,wallet);
+                            if (conf == 1) printf("\n\nBloco adicionado com Sucesso!\n");
+                        }
+                        else if (validate_chain(blk_current)) {
+                            Transaction trans = pull_first_transaction(); // Pega a primeira transação da pool
+                            int conf = add_blk(trans, list_address,wallet);
+                            if (conf == 1) printf("\n\nBloco adicionado com Sucesso!\n");
+                        } else {
+                            printf("\n\nO bloco não pode ser adicionado pois a blockchain não passou na validação!\n\n");
+                        }
+                        ////////
+                    } else {
+                        printf("\n\nEscolha um endereço que já existe para receber a taxa de mineração!\n");
                     }
-                    count_t--;
-                    //int data = trans.amount;
-                    int conf = add_blk(blk_current, trans, &blk_current);
-                    if (conf == 1) printf("\n\nBloco adicionado com Sucesso!\n");
-                }
-                else if (validate_chain(blk_current)) {
-                    Transaction trans = pool_wait[0]; // Pega a primeira transação da pool
-                    for (int i = 0; i < count_t - 1; i++) {
-                        pool_wait[i] = pool_wait[i + 1];
-                    }
-                    count_t--;
-                    //int data = trans.amount;
-                    int conf = add_blk(blk_current, trans, &blk_current);
-                    if (conf == 1) printf("\n\nBloco adicionado com Sucesso!\n");
                 } else {
-                    printf("\n\nO bloco não pode ser adicionado pois a blockchain não passou na validação!\n\n");
+                    printf("\n\nEsse endereço não é válido\n");
                 }
             }
             pause_screen();
@@ -149,7 +139,7 @@ int main()
 
 
         else if (choice == 8){
-            if (verify_null(blk_current)){
+            if (verify_null()){
                 printf("Antes de adicionar algum Bloco, Crie o Bloco Gênesis!\n");
             } else {
                 int check_wallet = 0;
@@ -166,21 +156,24 @@ int main()
                 printf("amount: \n");
                 scanf("%d",&amount);
                 if (check_wallet == 2){
-                    new_t = create_transaction(sender, receive, amount, list_address);
-                    count_t+=add_transaction(pool_wait,count_t,new_t);
+                    int check_create_transaction = create_transaction(sender, receive, amount, list_address);
+                    if ( check_create_transaction == 1){
+                        printf("\nTransação adicionada com Sucesso!\n");
+                    }
                 } else {
-                    printf("Algum dos endereços é inválido! Repita a operação com endereços válidos!");
+                    printf("Algum dos endereços é inválido! Repita a operação com endereços válidos!\n");
                 }
 
-                flush_in();
-                print_transaction_pool(pool_wait,count_t);
+                print_transaction_pool();
+//                flush_in();
             }
             pause_screen();
         }
 
         else if (choice == 9){
-            if (count_t > 0){
-                print_transaction_pool(pool_wait, count_t);
+            int check_is_pool_empty = pool_length();
+            if ( check_is_pool_empty> 0){
+                print_transaction_pool();
             } else {
                 printf("A pool de transações está vazia. Adicione uma transação primeiro!\n");
             }
@@ -218,7 +211,7 @@ int main()
 
         else if (choice == 4){
             clear_screen();
-            if (verify_null(blk_current)){
+            if (verify_null()){
                 printf("A blockchain ainda não existe para ser validada!\n");
             } else {
                 if (verify_prev_null(blk_current)){
@@ -234,11 +227,11 @@ int main()
             pause_screen();
         }
         else if (choice == 5){
-            //int count=3;
-            if (blk_current == NULL || blk_current->prev_blk == NULL || blk_current->prev_blk->prev_blk == NULL || blk_current->prev_blk->prev_blk->prev_blk == NULL){
+            int check_three = verify_minimum_three();
+            if (check_three == 0){
                 printf("Insira pelo menos 3 blocos na blockchain para isso!\n");
             } else {
-                int corruption = corrupt_chain(blk_current);
+                int corruption = corrupt_chain();
                 if (corruption) {
                     printf("O penúltimo bloco sofreu alteração nos dados para o valor 367256 assim gerando um novo hash!\n");
                     printf("A seguir, tente validar a blockchain e veja o que acontece!\n");
@@ -251,11 +244,66 @@ int main()
             pause_screen();
             clear_screen();
         }
-        else if(choice == 6){
+//        else if(choice == 6){
+//            clear_screen();
+//            free_chain(blk_current);
+//            blk_current = NULL;
+//            printf("Blockchain excluída com Sucesso!\n");
+//            pause_screen();
+//        }
+        else if (choice == 12){
             clear_screen();
-            free_chain(blk_current);
-            blk_current = NULL;
-            printf("Blockchain excluída com Sucesso!\n");
+            if(verify_null() == 0){
+                create_node();
+            } else {
+                printf("Insira Pelo menos o bloco gênesis!\n");
+            }
+            pause_screen();
+            clear_screen();
+        } else if (choice == 13) {
+            int node_choice;
+            int success;
+            clear_screen();
+            print_network();
+            printf("\n\nEscolha o nó a que deseja se conectar: \n");
+            scanf("%d",&node_choice);
+            success = change_node_to(node_choice);
+            if (success == 1){
+                printf("\nConectado com Sucesso!\n");
+            } else {
+                printf("erro");
+            }
+            pause_screen();
+        } else if (choice == 14){
+            clear_screen();
+            print_message_queue();
+            pause_screen();
+        } else if (choice == 15){
+            int check_process_message;
+            clear_screen();
+            check_process_message = process_message_queue();
+            if (check_process_message) printf("\n\nAtualizado!\n");
+            else printf("\n\nLista vazia!\n");
+            pause_screen();
+        } else if (choice == 16){
+            char wallet[13];
+            int balance;
+            if (print_addresses(list_address) == 0) {
+                printf("EMPTY\n");
+            } else {
+                clear_screen();
+                print_addresses(list_address);
+                printf("Digite qual carteira deseja visualizar o histórico: \n");
+                scanf("%s",wallet);
+                if (validate_wallet_address(wallet)){
+                    if (wallet_exists(list_address,wallet)) {
+                        balance = check_balance(list_address,wallet);
+                        printf("\nSaldo de %s: %d\n\n", wallet, balance);
+                    }
+                } else {
+                    printf("\n\nEsse endereço não é válido\n");
+                }
+            }
             pause_screen();
         }
         clear_screen();
