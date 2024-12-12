@@ -119,7 +119,7 @@ int main()
                             int conf = add_blk(trans, list_address,wallet);
                             if (conf == 1) printf("\n\nBloco adicionado com Sucesso!\n");
                         }
-                        else if (validate_chain(blk_current)) {
+                        else if (validate_chain()) {
                             Transaction trans = pull_first_transaction(); // Pega a primeira transação da pool
                             int conf = add_blk(trans, list_address,wallet);
                             if (conf == 1) printf("\n\nBloco adicionado com Sucesso!\n");
@@ -191,7 +191,7 @@ int main()
                 scanf("%s",wallet);
                 if (validate_wallet_address(wallet)){
                     if (wallet_exists(list_address,wallet)) {
-                        print_wallet_transactions(blk_current,wallet);
+                        print_wallet_transactions(wallet);
                     } else {
                         printf("\nEssa carteira não participa de nenhuma transação ainda!\n");
                     }
@@ -205,7 +205,7 @@ int main()
 
         else if (choice == 3){
             clear_screen();
-            print_chain(blk_current);
+            print_chain();
             pause_screen();
         }
 
@@ -217,7 +217,7 @@ int main()
                 if (verify_prev_null(blk_current)){
                     printf("Apenas o bloco gênesis compõe essa blockchain!\n");
                 } else {
-                    if (!validate_chain(blk_current)){
+                    if (!validate_chain()){
                         printf("Blockchain não é válida!\n");
                     } else {
                         printf("Blockchain é válida!\n");
@@ -293,7 +293,7 @@ int main()
             } else {
                 clear_screen();
                 print_addresses(list_address);
-                printf("Digite qual carteira deseja visualizar o histórico: \n");
+                printf("Digite qual carteira deseja ver o saldo: \n");
                 scanf("%s",wallet);
                 if (validate_wallet_address(wallet)){
                     if (wallet_exists(list_address,wallet)) {
