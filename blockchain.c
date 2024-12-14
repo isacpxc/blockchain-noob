@@ -50,18 +50,20 @@ void print_instructions() {
     printf("     Exibe histórico de transação de uma determinada carteira.\n\n");
     printf("11 - Sair\n");
     printf("     Encerra o programa.\n\n");
-    printf("==============================================\n\n");
-    printf("Observações: \n\n");
-    printf("*Quando se adiciona uma transação ela fica em espera numa pool de transações\n");
-    printf("*Após isso minere um bloco\n");
-    printf("*Quando um novo bloco for encontrado automaticamente a transação será colocada nele\n");
-    printf("*No momento cada bloco suporta apenas uma transação\n");
-    printf("*Formato esperado de endereço válido: 3 letras maiúsculas seguidos de 8 inteiros decimais seguido de uma letra maiúscula\n");
-    printf("**EXEMPLO: ABC12345678Z\n");
-    printf("*Tipo de 'amount' na transação: int\n");
-    printf("*A dificuldade(padrão = 2) de mineração do bloco pode ser ajustada em blockchain.h(!!!cuidado com a ousadia!!!)\n");
-    printf("*Se a dificuldade é X, o hash resultante deve conter uma quantidade X de '30' na frente, lembre-se que a impressão é em hexadecimal.\n");
-    printf("*'30'(hex) = '48'(dec) = '0'(string).\n\n");
+    printf("==============NOVAS FUNCIONALIDADES==============\n\n");
+    printf("12 - Criar e adicionar nó na rede\n");
+    printf("     Cria um novo nó e o adiciona a rede com mais um usuário.\n\n");
+    printf("13 - Trocar nó conectado\n");
+    printf("     Escolha um nó para se conectar na rede.\n\n");
+    printf("14 - Imprimir mensagens pendentes\n");
+    printf("     Imprime as mensagens em espera nó atual.\n\n");
+    printf("15 - Processar mensagens\n");
+    printf("     Processa as mensagens em espera nó atual e o adiciona ou na pool de transações ou na blockchain.\n\n");
+    printf("16 - Selecione um endereço e veja qual seu saldo atual.\n");
+    printf("     Selecione um endereço existente e verifique seu saldo atual na blockchain.\n\n");
+    printf("============================Como funciona a resolução de fork nese projeto por enquanto?============================\n");
+    printf("*Se durante o \"processar imagens\" no nó é encontrado um bloco com id igual ao atual da blockchain temos um fork. Se ainda não existe uma mensagem com bloco de id subsequente ao duplicado, a mesagem do bloco duplicado permanece na pool de mensagens. Se a mensagem em questão existe então o algoritmo adota a cadeia com id mais longo. Além do mais, a transação do bloco \"descartado\" com id duplicado vai para a pool de transações pendentes, aguardando um novo bloco a ser minerado.");
+    printf("");
 }
 
 Block* create_genesis_block(){
@@ -226,7 +228,6 @@ int add_blk(Transaction trans, Address **list_address, Address* wallet) {
     blk->hash = hash_block(*blk);
     blk->trans = trans;
 
-    // Verificar novamente se o remetente tem saldo suficiente
     Address *current_address = *list_address;
     Address *sender_address = NULL;
     Address *recipient_address = NULL;
@@ -374,23 +375,11 @@ int validate_wallet_address(const char* wallet_address) {
     return 1;
 }
 
-//int create_transaction(char sender[], char recipient[], int amount,Address **list_address) {
-//    Transaction t;
-//    strncpy(t.sender_wallet, sender, 13);
-//    strncpy(t.recipient_wallet, recipient, 13);
-//    t.amount = amount;
-//    add_unique_address(list_address, sender);
-//    add_unique_address(list_address, recipient);
-//    add_transaction(t);
-//    return 1;
-//}
 
 int create_transaction(char sender[], char recipient[], int amount, Address **list_address) {
-    // Adicionar endereços únicos à lista
     add_unique_address(list_address, sender);
     add_unique_address(list_address, recipient);
 
-    // Encontrar o endereço do remetente e do destinatário na lista para verificar o saldo
     Address *current = *list_address;
     Address *sender_address = NULL;
     Address *recipient_address = NULL;
@@ -421,9 +410,7 @@ int create_transaction(char sender[], char recipient[], int amount, Address **li
     t.tax = TAX_TRANSACTION;
 
     if (sender_address->balance >= t.tax + amount) {
-        // Criar a transação se o saldo for suficiente
-        add_transaction(t);
-        // Atualizar saldo do remetente e destinatário
+        add_transaction(t,0);
         sender_address->balance -= (t.tax);
         return 1;
     } else {
@@ -435,11 +422,11 @@ int create_transaction(char sender[], char recipient[], int amount, Address **li
 
 
 
-int add_transaction(Transaction trans) {
+int add_transaction(Transaction trans, int all) {
     if (current_node->transaction_count < MAX_TRANSACTIONS) {
         current_node->transaction_pool[current_node->transaction_count] = trans;
         current_node->transaction_count++;
-        broadcast_transaction(trans);
+        broadcast_transaction(trans,all);
         return 1;
     } else {
         return 0;
@@ -496,7 +483,6 @@ void print_transaction_pool() {
             printf("  Quantidade: %d\n", pool[i].amount);
         }
     }
-//    printf("printado");
     free(pool);
 }
 
@@ -589,11 +575,10 @@ Node* create_main_node() {
     node->id = 0;
     node->blockchain = NULL;
     node->message_queue = NULL;
-    node->transaction_count = 0; // Inicializa contagem de transações
+    node->transaction_count = 0;
     node->next = NULL;
     node->prev = NULL;
     network_length++;
-//    printf("teste: %d", node->id);
 
     return node;
 }
@@ -623,9 +608,7 @@ void create_node(){
     }
 
     new_node->blockchain = latest_added_node->blockchain;
-//    printf("id = %d\n", latest_added_node->id);
     new_node->id = latest_added_node->id + 1;
-//    printf("id = %d\n", new_node->id);
     new_node->message_queue = latest_added_node->message_queue;
     new_node->next = NULL;
     new_node->prev = latest_added_node;
@@ -695,15 +678,15 @@ int verify_minimum_three() {
     while (current_block != NULL) {
         count++;
         if (count >= 3) {
-            return 1; // Retorna 1 se existirem pelo menos 3 blocos
+            return 1;
         }
         current_block = current_block->prev_blk;
     }
 
-    return 0; // Retorna 0 se existirem menos de 3 blocos
+    return 0;
 }
 
-void broadcast_transaction(Transaction trans) {
+void broadcast_transaction(Transaction trans, int all) {
     Message *new_message = (Message *)malloc(sizeof(Message));
     if (new_message == NULL) {
         fprintf(stderr, "Erro ao alocar memória para a mensagem\n");
@@ -715,9 +698,17 @@ void broadcast_transaction(Transaction trans) {
 
     Node *current = latest_added_node;
     while (current != NULL) {
-        // Adiciona a mensagem na fila de mensagens do nó
-        new_message->last_message = current->message_queue;
-        current->message_queue = new_message;
+        //all determina se o broadcast é para todos ou exclui o nó atual
+        if (all == 1){
+            new_message->last_message = current->message_queue;
+            current->message_queue = new_message;
+        } else {
+            if (current != current_node){
+                new_message->last_message = current->message_queue;
+                current->message_queue = new_message;
+            }
+        }
+
 
         current = current->prev;
     }
@@ -737,9 +728,10 @@ void broadcast_block(Block *blk) {
 
     Node *current = latest_added_node;
     while (current != NULL) {
-        // Adiciona a mensagem na fila de mensagens do nó
-        new_message->last_message = current->message_queue;
-        current->message_queue = new_message;
+        if (current != current_node){
+            new_message->last_message = current->message_queue;
+            current->message_queue = new_message;
+        }
 
         current = current->prev;
     }
@@ -780,24 +772,22 @@ int process_message_queue() {
     Message *prev_msg = NULL;
 
     while (msg != NULL) {
-        printf("Verificando mensagem do tipo %c\n", msg->type);  // Depuração
+        printf("Verificando mensagem do tipo %c\n", msg->type);
 
-        // Adicione uma verificação de tipo de mensagem válido
         if (msg->type != 'T' && msg->type != 'B') {
-            printf("Tipo de mensagem inválido: %c\n", msg->type);  // Depuração
-            return -1;  // Sai da função em caso de tipo inválido
+            printf("Tipo de mensagem inválido: %c\n", msg->type);
+            return -1;
         }
 
         if (msg->type == 'T') {
-            // Adiciona a transação à pool sem verificar duplicidade
+
             if (current_node->transaction_count < MAX_TRANSACTIONS) {
                 current_node->transaction_pool[current_node->transaction_count] = msg->data.transaction;
                 current_node->transaction_count++;
-                printf("Transação adicionada\n");  // Depuração
+                printf("Transação adicionada\n");
             } else {
                 printf("Limite de transações atingido!\n");
             }
-            // Remove a mensagem da fila de mensagens
             if (prev_msg == NULL) {
                 current_node->message_queue = msg->last_message;
             } else {
@@ -805,13 +795,8 @@ int process_message_queue() {
             }
             Message *temp = msg;
             msg = msg->last_message;
-            // Adiciona verificação antes de liberar a memória
-            // if (temp != NULL) {
-            //    free(temp);
-            //    temp = NULL;  // Garanta que o ponteiro não seja usado após a liberação
-            // }
+
         } else if (msg->type == 'B') {
-            // Verifica se o bloco já existe na blockchain
             Block *current_block = current_node->blockchain;
             int exists = 0;
             while (current_block != NULL) {
@@ -821,12 +806,10 @@ int process_message_queue() {
                 }
                 current_block = current_block->prev_blk;
             }
-            // Adiciona o bloco à blockchain se não existir
             if (!exists) {
                 int fork_resolution_result = handle_fork_resolution();
                 if (fork_resolution_result == FORK_RESOLVED) {
                     printf("Fork resolvido e cadeia mais longa adotada.\n");
-                    // Remove a mensagem da fila de mensagens
                     if (prev_msg == NULL) {
                         current_node->message_queue = msg->last_message;
                     } else {
@@ -834,10 +817,9 @@ int process_message_queue() {
                     }
                     Message *temp = msg;
                     msg = msg->last_message;
-                    // Adiciona verificação antes de liberar a memória
                     // if (temp != NULL) {
                     //    free(temp);
-                    //    temp = NULL;  // Garanta que o ponteiro não seja usado após a liberação
+                    //    temp = NULL;
                     // }
                 } else if (fork_resolution_result == NO_NEXT_BLOCK_FOUND) {
                     printf("Fork detectado, mas sem bloco subsequente. Mensagem permanece na fila.\n");
@@ -845,7 +827,6 @@ int process_message_queue() {
                     msg = msg->last_message;
                 } else if (fork_resolution_result == NO_BLOCK_WITH_SAME_ID_FOUND) {
                     printf("Nenhuma mensagem com o mesmo ID do último bloco foi encontrada.\n");
-                    // Adiciona o bloco da mensagem à blockchain
                     Block *new_block = (Block *)malloc(sizeof(Block));
                     if (new_block == NULL) {
                         fprintf(stderr, "Erro ao alocar memória para o bloco\n");
@@ -864,10 +845,9 @@ int process_message_queue() {
                     }
                     Message *temp = msg;
                     msg = msg->last_message;
-                    // Adiciona verificação antes de liberar a memória
                     // if (temp != NULL) {
                     //    free(temp);
-                    //    temp = NULL;  // Garanta que o ponteiro não seja usado após a liberação
+                    //    temp = NULL;
                     // }
                 }
             } else {
@@ -882,7 +862,7 @@ int process_message_queue() {
 
                 // if (temp != NULL) {
                 //    free(temp);
-                //    temp = NULL;  // Garanta que o ponteiro não seja usado após a liberação
+                //    temp = NULL;
                 // }
             }
         }
@@ -897,7 +877,7 @@ int process_message_queue() {
 
 Message* find_message_with_block_id() {
     if (current_node->blockchain == NULL) {
-        return NULL; // Blockchain não inicializada
+        return NULL;
     }
 
     Block *latest_block = current_node->blockchain;
@@ -905,16 +885,16 @@ Message* find_message_with_block_id() {
 
     while (msg != NULL) {
         if (msg->type == 'B' && msg->data.block.id == latest_block->id) {
-            return msg; // Encontrou uma mensagem com o mesmo ID do último bloco
+            return msg;
         }
         msg = msg->last_message;
     }
-    return NULL; // Nenhuma mensagem com o mesmo ID do último bloco foi encontrada
+    return NULL;
 }
 
 Message* find_next_block_message(Block *current_block) {
     if (current_block == NULL) {
-        return NULL; // Bloco atual não fornecido
+        return NULL;
     }
 
     int next_block_id = current_block->id + 1;
@@ -922,35 +902,31 @@ Message* find_next_block_message(Block *current_block) {
 
     while (msg != NULL) {
         if (msg->type == 'B' && msg->data.block.id == next_block_id) {
-            return msg; // Encontrou uma mensagem com o próximo ID de bloco
+            return msg;
         }
         msg = msg->last_message;
     }
-    return NULL; // Nenhuma mensagem com o próximo ID de bloco foi encontrada
+    return NULL;
 }
 
 int handle_fork_resolution() {
-    // Primeiro, encontre a mensagem com o mesmo ID do último bloco da blockchain
     Message *current_msg = find_message_with_block_id();
     if (current_msg != NULL) {
         Block *current_block = &current_msg->data.block;
         printf("Bloco atual encontrado: ID %zu\n", current_block->id);
 
-        // Agora, procure por uma mensagem que contenha o próximo bloco na sequência
         Message *next_msg = find_next_block_message(current_block);
         if (next_msg != NULL) {
             printf("Próximo bloco na sequência encontrado: ID %zu\n", next_msg->data.block.id);
 
-            // Verifica se prev_hash de next_msg é igual ao hash do último bloco da blockchain atual
             if (memcmp(next_msg->data.block.prev_hash, current_node->blockchain->hash, SHA256_DIGEST_LENGTH) == 0) {
                 printf("Hashes correspondem. Adicionando transação de current_msg à pool de transações.\n");
-                add_transaction(current_msg->data.block.trans);
+                add_transaction(current_msg->data.block.trans,1);
             } else {
                 printf("Hashes não correspondem. Adicionando transação do último bloco da blockchain à pool de transações.\n");
-                add_transaction(current_node->blockchain->trans);
+                add_transaction(current_node->blockchain->trans,1);
             }
 
-            // Integra a blockchain do bloco next_msg na blockchain do nó atual
             current_node->blockchain = &next_msg->data.block;
 
             printf("Fork resolvido adotando a cadeia mais longa.\n");
@@ -1012,7 +988,6 @@ int transaction_exists_in_messages(Transaction *transaction) {
                     free(target_hash);
                     free(msg_hash);
 
-                    // Remover a mensagem da lista
                     if (prev_msg == NULL) {
                         current_node->message_queue = msg->last_message;
                     } else {
@@ -1020,7 +995,7 @@ int transaction_exists_in_messages(Transaction *transaction) {
                     }
                     free(msg);
 
-                    return 1; // Transação encontrada e mensagem removida
+                    return 1;
                 }
                 free(msg_hash);
             }
@@ -1031,7 +1006,7 @@ int transaction_exists_in_messages(Transaction *transaction) {
     }
 
     free(target_hash);
-    return 0; // Transação não encontrada
+    return 0;
 }
 
 int check_balance(Address **list_address, char wallet_address[13]) {
