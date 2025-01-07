@@ -1,0 +1,55 @@
+# depslib dependency file v1.0
+1731195718 source:c:\users\lord\desktop\compass\blockchain\main.c
+	<stdio.h>
+	<stdlib.h>
+	<locale.h>
+	"blockchain.h"
+	<string.h>
+
+1731015973 c:\users\lord\desktop\compass\blockchain\block.h
+	<time.h>
+
+1729303301 source:c:\users\lord\desktop\compass\blockchain\func.c
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+	"func.h"
+	<openssl/sha.h>
+
+1729303432 c:\users\lord\desktop\compass\blockchain\func.h
+	"block.h"
+
+1731195710 c:\users\lord\desktop\compass\blockchain\blockchain.h
+	"block.h"
+
+1731195912 source:c:\users\lord\desktop\compass\blockchain\blockchain.c
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+	<string.h>
+	"blockchain.h"
+	<openssl/sha.h>
+	<ctype.h>
+
+1734167323 source:c:\users\lord\documents\compass\blockchain\blockchain.c
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+	<string.h>
+	"blockchain.h"
+	<openssl/sha.h>
+	<ctype.h>
+
+1734167093 c:\users\lord\documents\compass\blockchain\blockchain.h
+	"block.h"
+
+1733981363 c:\users\lord\documents\compass\blockchain\block.h
+	<time.h>
+
+1734166198 source:c:\users\lord\documents\compass\blockchain\main.c
+	<stdio.h>
+	<stdlib.h>
+	<locale.h>
+	"blockchain.h"
+	<string.h>
+
